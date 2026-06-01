@@ -1,0 +1,18 @@
+# Render.com blueprint for the HealthScan backend (anatomy image API).
+# Connect this repo on render.com → it auto-detects this file.
+# After deploy, set the OPENAI_API_KEY env var in the Render dashboard.
+services:
+  - type: web
+    name: healthscan-api
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false # set this manually in the Render dashboard
+      - key: ALLOWED_ORIGIN
+        value: https://test.dana-assist.com
+      - key: NODE_VERSION
+        value: 18.20.4
