@@ -4,7 +4,7 @@
 // Pure ESM: imported by both the React app and the Node server.
 // ============================================================
 
-export const BASE = `A highly detailed educational medical anatomy illustration of a full human figure (an anatomy teaching model), front view, standing upright, head to feet fully in frame and centered, on a plain neutral studio background. LAYERED anatomy-chart style — the body transitions across visible layers: on one side a section of realistic textured skin, transitioning into the muscle layer with visible fibers and definition, transitioning into the internal organs (brain, eyes, heart, two lungs, liver, stomach, intestines, kidneys) and a faint skeleton beneath. Rendered realistically with natural surface texture and subtle, lifelike imperfections — NOT idealized, plastic or perfectly smooth. Cool clinical studio lighting, premium and modern. Anatomically accurate, tasteful and strictly non-graphic, educational.`
+export const BASE = `A highly detailed educational medical anatomy illustration of a full human figure (an anatomy teaching model), front view, standing upright, head to feet fully in frame and centered, on a plain neutral studio background. LAYERED anatomy-chart style — the body transitions across visible layers: on one side a section of realistic textured skin, transitioning into the muscle layer with visible fibers and definition, transitioning into the internal organs (brain, eyes, heart, two lungs, liver, stomach, intestines, kidneys) and a faint skeleton beneath. Rendered realistically with natural surface texture and subtle, lifelike imperfections — NOT idealized, plastic or perfectly smooth. Cool clinical studio lighting, premium and modern. The face is a single neutral, calm, standard human face — the SAME identical face for every model, never individualized. Anatomically accurate, tasteful and strictly non-graphic, educational.`
 
 // Per-organ damage descriptions, GRADED by severity (1 mild → 3 severe).
 // Mild stays subtle and realistic; only severe looks pronounced.
@@ -59,7 +59,16 @@ function bodyClause(demo) {
   const b = demo.bmi
   if (b) build = b < 18.5 ? 'a slim, lean build' : b < 25 ? 'an average, fit build' : b < 30 ? 'a fuller, slightly heavier build with more abdominal volume' : 'a noticeably larger, heavier build with a rounder abdomen'
   const h = demo.heightCm ? `, roughly ${demo.heightCm} cm tall` : ''
-  return ` The teaching model represents ${sexWord} with ${build}${h}, and its body proportions should reflect that.`
+  let aura = ''
+  if (typeof demo.energy === 'number') {
+    const e = demo.energy
+    aura = e >= 72
+      ? ' The whole figure emanates a bright, warm, luminous aura/glow — radiating high energy, vitality and good mood.'
+      : e >= 50
+      ? ' The figure has a soft, balanced glow — moderate energy and a calm mood.'
+      : ' The figure has a dim, low, cool and subdued aura — reflecting low energy, tiredness and a heavier mood.'
+  }
+  return ` The teaching model represents ${sexWord} with ${build}${h}, and its body proportions should reflect that.${aura}`
 }
 
 // organs: [{ id, state, severity }]  demo: { sex, bmi, heightCm }
@@ -85,7 +94,7 @@ export function buildAnatomyPrompt(organs, demo) {
 
 // A short, stable cache key (severity + body-type aware).
 export function anatomyKey(organs, demo) {
-  const d = demo ? `${demo.sex || '-'}/${demo.bmi ? Math.round(demo.bmi) : '-'}/${demo.heightCm || '-'}` : '-'
+  const d = demo ? `${demo.sex || '-'}/${demo.bmi ? Math.round(demo.bmi) : '-'}/${demo.heightCm || '-'}/${typeof demo.energy === 'number' ? Math.round(demo.energy / 10) : '-'}` : '-'
   const organKey = (organs || [])
     .map((o) => `${o.id}:${sevOf(o)}`)
     .filter((s) => !s.endsWith(':0'))

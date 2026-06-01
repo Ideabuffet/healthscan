@@ -83,7 +83,12 @@ export function buildBodyMap(data, answers) {
   })
 
   const worst = organs.reduce((w, o) => (o.severity > w.severity ? o : w), organs[0])
-  const demographics = { sex: d.sex, age: d.age, bmi: d.bmi, heightCm: d.height, weightKg: d.weight }
+  // energy / mood 0–100 (sleep, stress, activity) — drives the figure's aura/glow
+  const energy = Math.max(0, Math.min(100, 70
+    + (a('B11') === 'lt6' ? -20 : 5)
+    + (a('B12') === 'often' ? -20 : a('B12') === 'sometimes' ? -10 : 5)
+    + (a('B9') === 'lt30' ? -15 : a('B9') === '30-149' ? -3 : 10)))
+  const demographics = { sex: d.sex, age: d.age, bmi: d.bmi, heightCm: d.height, weightKg: d.weight, energy }
   return { organs, worst: worst?.id || 'heart', demographics }
 }
 
