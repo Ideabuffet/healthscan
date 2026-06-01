@@ -51,6 +51,8 @@ export function buildBodyMap(data, answers) {
   const organs = ORGANS.map((def) => {
     const severity = Math.max(0, Math.min(3, def.sev(raw, d, a) | 0))
     const state = STATE[severity]
+    // continuous 0–100 vitality (100 = luminous/healthy, 0 = most strained)
+    const vitality = Math.max(0, Math.min(100, Math.round(100 - (STRAIN[def.id] ? STRAIN[def.id](raw, d, a) : 0))))
     const findings = []
     const recs = []
 
@@ -75,7 +77,7 @@ export function buildBodyMap(data, answers) {
 
     return {
       id: def.id, label: def.label, sub: def.sub,
-      state, severity, score: SCORE_BY_SEV[severity],
+      state, severity, vitality, score: vitality,
       headline, findings: dedupe(findings).slice(0, 3), recs: recsOut,
     }
   })
@@ -136,6 +138,60 @@ function sevMuscles(raw, d, a) {
   if (a('B9') === 'lt30') s = 2; else if (a('B9') === '30-149') s = 1
   if (raw.steadi) s = Math.max(s, raw.steadi.level === 'high' ? 3 : raw.steadi.level === 'mod' ? 2 : 0)
   return s
+}
+
+// ---------- continuous strain (0..100) per organ, from raw magnitudes ----------
+const clamp = (v) => Math.max(0, Math.min(100, v))
+const STRAIN = {
+  lungs(raw, d, a) {
+    let s = 0
+    if (raw.packYears) s = clamp(raw.packYears.py * 4)        // 25 pack-years -> 100
+    if (raw.ftnd) s = Math.max(s, raw.ftnd.score * 10)         // FTND 0..10
+    if (d.smokerCurrent && s < 25) s = 25
+    if (a('B7') === 'quit') s *= 0.5
+    return clamp(s)
+  },
+  liver(raw, d) {
+    if (!raw.audit) return 0
+    const { auditC, total } = raw.audit
+    const pos = d.sex === 'female' ? auditC >= 3 : auditC >= 4
+    return pos ? clamp(35 + (total - 8) * 4) : clamp(auditC * 7)
+  },
+  heart(raw, d, a) {
+    let s = 0
+    if (raw.score2 && !raw.score2.insufficient) s = clamp(raw.score2.pct * 7) // ~14% -> 100
+    if (a('B5') === 'high') s = Math.max(s, 55); else if (a('B5') === 'elevated') s = Math.max(s, 30)
+    if (raw.stopBang && raw.stopBang.level === 'high') s = Math.max(s, 45)
+    if (raw.metabolic) s = Math.max(s, Math.min(40, raw.metabolic.count * 13))
+    return clamp(s)
+  },
+  digestive(raw, d, a) {
+    let s = 0
+    if (raw.findrisc) s = Math.max(s, (raw.findrisc.score / 26) * 100)
+    if (raw.metabolic) s = Math.max(s, Math.min(100, raw.metabolic.count * 22))
+    if (a('B10') === 'sweets_fat' || a('B10') === 'irregular') s = Math.max(s, 30)
+    return clamp(s)
+  },
+  brain(raw, d, a) {
+    let s = 0
+    if (raw.dast) s = Math.max(s, Math.min(100, raw.dast.score * 15))
+    if (raw.stopBang) s = Math.max(s, raw.stopBang.score * 8)
+    if (a('B11') === 'lt6') s = Math.max(s, 30)
+    if (a('B12') === 'often') s = Math.max(s, 32); else if (a('B12') === 'sometimes') s = Math.max(s, 18)
+    return clamp(s)
+  },
+  kidneys(raw, d, a) {
+    let s = 0
+    if (a('B5') === 'high') s = 55; else if (a('B5') === 'elevated') s = 30
+    if (raw.metabolic) s = Math.max(s, Math.min(80, raw.metabolic.count * 18))
+    return clamp(s)
+  },
+  muscles(raw, d, a) {
+    let s = a('B9') === 'lt30' ? 65 : a('B9') === '30-149' ? 38 : 12
+    if (raw.steadi && raw.steadi.level === 'high') s = Math.max(s, 75)
+    else if (raw.steadi && raw.steadi.level === 'mod') s = Math.max(s, 50)
+    return clamp(s)
+  },
 }
 
 function dedupe(arr) {

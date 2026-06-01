@@ -1,4 +1,4 @@
-import TrustLogos, { SCIENCE_BASIS } from './TrustLogos.jsx'
+import TrustLogos, { SCIENCE_BASIS, PARTNERS } from './TrustLogos.jsx'
 import { useI18n, LANGS } from '../i18n.jsx'
 import {
   IconHeart, IconShield, IconClock, IconLock, IconList, IconDoc, IconChart,
@@ -19,6 +19,54 @@ function Brand() {
   )
 }
 
+// ---- systems shown around the body (landing showcase · example scores) ----
+const SYS_LEFT = ['brain', 'heart', 'lungs', 'digestive', 'immune']
+const SYS_RIGHT = ['muscles', 'endocrine', 'kidneys', 'skin', 'index']
+const SYS_DATA = {
+  brain: { score: 92, tone: 'good', c: '#6ea8ff' }, heart: { score: 76, tone: 'good', c: '#ff7a7a' },
+  lungs: { score: 88, tone: 'good', c: '#a78bfa' }, digestive: { score: 64, tone: 'warn', c: '#e3aa45' },
+  immune: { score: 82, tone: 'good', c: '#34d399' }, muscles: { score: 62, tone: 'warn', c: '#e3aa45' },
+  endocrine: { score: 79, tone: 'good', c: '#f0a8c8' }, kidneys: { score: 91, tone: 'good', c: '#f0a8c8' },
+  skin: { score: 58, tone: 'warn', c: '#d8a878' }, index: { score: 86, tone: 'gold', c: '#e3aa45' },
+}
+const SYS_T = {
+  ru: { brain: ['Мозг и нервная система', 'Оптимально'], heart: ['Сердце и сосуды', 'Низкий риск'], lungs: ['Дыхательная система', 'Хорошее состояние'], digestive: ['Пищеварительная система', 'Есть нагрузка'], immune: ['Иммунная система', 'Стабильно'], muscles: ['Опорно-двигательная система', 'Есть нагрузка'], endocrine: ['Эндокринная система', 'В пределах нормы'], kidneys: ['Мочевыделительная система', 'Оптимально'], skin: ['Кожа', 'Требует внимания'], index: ['Индекс здоровья', 'Общее состояние'] },
+  en: { brain: ['Brain & nervous system', 'Optimal'], heart: ['Heart & vessels', 'Low risk'], lungs: ['Respiratory system', 'Good condition'], digestive: ['Digestive system', 'Under strain'], immune: ['Immune system', 'Stable'], muscles: ['Musculoskeletal system', 'Under strain'], endocrine: ['Endocrine system', 'Within range'], kidneys: ['Urinary system', 'Optimal'], skin: ['Skin', 'Needs attention'], index: ['Health index', 'Overall state'] },
+  es: { brain: ['Cerebro y s. nervioso', 'Óptimo'], heart: ['Corazón y vasos', 'Riesgo bajo'], lungs: ['Sistema respiratorio', 'Buen estado'], digestive: ['Sistema digestivo', 'Bajo presión'], immune: ['Sistema inmunitario', 'Estable'], muscles: ['Sistema musculoesquelético', 'Bajo presión'], endocrine: ['Sistema endocrino', 'En rango'], kidneys: ['Sistema urinario', 'Óptimo'], skin: ['Piel', 'Requiere atención'], index: ['Índice de salud', 'Estado general'] },
+}
+function SysIcon({ id }) {
+  const p = {
+    brain: 'M12 5c-2 0-3 1.4-3 3 0 .6.2 1.1.5 1.6C8.6 10 8 10.9 8 12c0 1.3.9 2.4 2.1 2.7M12 5c2 0 3 1.4 3 3 0 .6-.2 1.1-.5 1.6.9.4 1.5 1.3 1.5 2.4 0 1.3-.9 2.4-2.1 2.7M12 5v12.5',
+    heart: 'M12 20s-7-4.5-7-9.5A3.6 3.6 0 0 1 12 8a3.6 3.6 0 0 1 7 2.5C19 15.5 12 20 12 20z',
+    lungs: 'M12 4v6M9.5 10c-2 1-3.5 3-3.5 6 0 2 1 3 2.5 3S11 17 11 15v-3a2 2 0 0 0-1.5-2zM14.5 10c2 1 3.5 3 3.5 6 0 2-1 3-2.5 3S13 17 13 15v-3a2 2 0 0 1 1.5-2z',
+    digestive: 'M10 5v4c0 2 2 2 2 4s-2 2-2 4M14 6c2 1 3 3 3 6s-3 5-6 5',
+    immune: 'M12 4l6 2v5c0 4-3 6-6 7-3-1-6-3-6-7V6l6-2z',
+    muscles: 'M6 6l2 2M16 16l2 2M5 9l4-4M15 19l4-4M8 8l8 8',
+    endocrine: 'M12 6c-2 0-4 2-4 4s2 4 4 4M12 6c2 0 4 2 4 4s-2 4-4 4M12 6v12',
+    kidneys: 'M9.5 7c-2 0-3 2-3 5s1 5 3 5c1 0 1.5-1 1.3-2.5C10.5 16 9.5 14 10 12s1.5-5-.5-5zM14.5 7c2 0 3 2 3 5s-1 5-3 5c-1 0-1.5-1-1.3-2.5C13.5 16 14.5 14 14 12s-1.5-5 .5-5z',
+    skin: 'M5 8h14M5 12h14M5 16h14',
+    index: 'M5 19V5M5 19h14M8 16v-4M12 16V9M16 16v-7',
+  }[id] || 'M12 5v14'
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d={p} /></svg>
+}
+function SysCard({ id, side, lang }) {
+  const d = SYS_DATA[id]
+  const [name, status] = (SYS_T[lang] || SYS_T.ru)[id]
+  return (
+    <div className={`sys-card sys-${side}`}>
+      <span className="sys-conn" /><span className="sys-dot" style={{ '--dot': d.c }} />
+      <span className="sys-ic" style={{ color: d.c }}><SysIcon id={id} /></span>
+      <div className="sys-body">
+        <div className="sys-name">{name}</div>
+        <div className="sys-row">
+          <span className={`sys-status t-${d.tone}`}>{status}</span>
+          <span className="sys-score">{d.score}<small>/100</small></span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export function LangSwitcher() {
   const { lang, setLang } = useI18n()
   return (
@@ -35,11 +83,20 @@ export function LangSwitcher() {
 export default function Landing({ onStart }) {
   const { t, lang } = useI18n()
   const younger = lang === 'ru' ? '−5 лет моложе' : lang === 'en' ? '−5 years younger' : '−5 años más joven'
+  const L = lang === 'en' || lang === 'es' ? lang : 'ru'
+  const scanBadge = { ru: 'Научный анализ на основе ИИ и валидированных методик', en: 'AI-based scientific analysis & validated methods', es: 'Análisis científico con IA y métodos validados' }[L]
+  const scanCap = { ru: 'Сканирование организма на основе ваших ответов', en: 'Scanning your body from your answers', es: 'Escaneo de tu cuerpo según tus respuestas' }[L]
+  const FEATURES = {
+    ru: [['Научный подход', 'Методики ВОЗ, CDC, SEMFYC'], ['100% анонимно', 'Ваши данные под защитой'], ['Персональные рекомендации', 'Индивидуальные советы'], ['Быстро и удобно', 'Результат за 10–15 минут']],
+    en: [['Scientific approach', 'WHO, CDC, SEMFYC methods'], ['100% anonymous', 'Your data is protected'], ['Personal recommendations', 'Individual advice'], ['Fast & easy', 'Result in 10–15 minutes']],
+    es: [['Enfoque científico', 'Métodos OMS, CDC, SEMFYC'], ['100% anónimo', 'Tus datos protegidos'], ['Recomendaciones personales', 'Consejos individuales'], ['Rápido y fácil', 'Resultado en 10–15 min']],
+  }[L]
+  const FIC = [IconShield, IconLock, IconChart, IconClock]
   return (
     <div className="shell">
       <header className="topbar">
         <div className="container topbar-inner">
-          <Brand />
+          <div className="brand-wrap"><Brand /><span className="by-dana">by Dana&nbsp;Assist</span></div>
           <div className="topbar-meta">
             <LangSwitcher />
             <span className="pill"><IconLock style={{ width: 15, height: 15 }} /> {t('nav.anon')}</span>
@@ -49,57 +106,51 @@ export default function Landing({ onStart }) {
         </div>
       </header>
 
-      {/* HERO */}
-      <section className="hero">
-        <div className="container hero-grid">
-          <div>
-            <span className="kbadge"><IconShield style={{ width: 14, height: 14 }} /> {t('hero.badge')}</span>
+      {/* HERO — scan: body centered, system cards around it */}
+      <section className="hero hero--scan">
+        <div className="container">
+          <div className="scan-head">
+            <span className="scan-badge"><IconShield style={{ width: 13, height: 13 }} /> {scanBadge}</span>
             <h1>{t('hero.h1a')} <em>{t('hero.h1em')}</em> {t('hero.h1b')}</h1>
-            <p className="hero-lead">{t('hero.lead')}</p>
-            <div className="hero-cta">
-              <button className="btn btn-primary btn-lg" onClick={onStart}>
-                {t('hero.cta')} <IconArrowR style={{ width: 18, height: 18 }} />
-              </button>
-              <span className="pill"><IconClock style={{ width: 15, height: 15 }} /> {t('hero.pill')}</span>
+            <p className="scan-lead">{t('hero.lead')}</p>
+          </div>
+
+          <div className="scan-stage">
+            <div className="scan-col scan-col-l">
+              {SYS_LEFT.map((id) => <SysCard key={id} id={id} side="l" lang={L} />)}
             </div>
-            <div className="hero-stats">
-              <div className="hero-stat"><span className="n">9</span><span className="l">{t('hero.s1')}</span></div>
-              <div className="hero-stat"><span className="n">8</span><span className="l">{t('hero.s2')}</span></div>
-              <div className="hero-stat"><span className="n">100%</span><span className="l">{t('hero.s3')}</span></div>
+
+            <div className="scan-body">
+              <span className="ex-tag ex-tag--dark">{t('exampleTag')}</span>
+              <img className="anatomy-img" src="/anatomy/base-healthy.png?v=4" alt={t('hero.scan')} />
+              <span className="scan-pedestal" />
             </div>
-            <div className="hero-reassure">
-              <span className="dot"><IconShield /> {t('hero.r1')}</span>
-              <span className="dot"><IconLock /> {t('hero.r2')}</span>
-              <span className="dot"><IconHeart /> {t('hero.r3')}</span>
+
+            <div className="scan-col scan-col-r">
+              {SYS_RIGHT.map((id) => <SysCard key={id} id={id} side="r" lang={L} />)}
             </div>
           </div>
 
-          <div className="hero-stage">
-            <div className="hero-glow" />
-            <div className="float-card fc-1">
-              <div className="fc-row">
-                <span className="fc-ic green"><IconHeart /></span>
-                <div><div className="fc-k">{t('hero.fc1t')}</div><div className="fc-v">{t('hero.fc1v')}</div></div>
-              </div>
-            </div>
-            <div className="float-card fc-2">
-              <div className="fc-row">
-                <span className="fc-ic gold"><IconChart /></span>
-                <div><div className="fc-k">{t('hero.fc2t')}</div><div className="fc-v">86<small> / 100</small></div></div>
-              </div>
-            </div>
-            <div className="float-card fc-3">
-              <div className="fc-row">
-                <span className="fc-ic green"><IconLeaf /></span>
-                <div><div className="fc-k">{t('hero.fc3t')}</div><div className="fc-v"><small>{t('hero.fc3v')}</small> {t('hero.fc3s')}</div></div>
-              </div>
-            </div>
-            <div className="anatomy-stage">
-              <span className="ex-tag ex-tag--dark">{t('exampleTag')}</span>
-              <span className="bf-stage-label"><span className="d" /> {t('hero.scan')}</span>
-              <img className="anatomy-img" src="/anatomy/base-healthy.png?v=2" alt={t('hero.scan')} />
-              <span className="anatomy-scan" />
-              <span className="anatomy-glow" />
+          <div className="scan-caption"><IconShield style={{ width: 14, height: 14 }} /> {scanCap}</div>
+
+          <div className="scan-features">
+            {FEATURES.map(([t1, t2], i) => {
+              const Ic = FIC[i]
+              return (
+                <div className="scan-feat" key={i}>
+                  <span className="scan-feat-ic"><Ic style={{ width: 18, height: 18 }} /></span>
+                  <div><div className="scan-feat-t">{t1}</div><div className="scan-feat-s">{t2}</div></div>
+                </div>
+              )
+            })}
+          </div>
+
+          <div className="hero-logos">
+            <span className="hero-logos-label">{t('trust.label')}</span>
+            <div className="hero-logos-row">
+              {PARTNERS.map((p) => (
+                <span className="hl-mark" key={p.file}><img src={`/logos/trust/${p.file}`} alt={p.name} loading="lazy" /></span>
+              ))}
             </div>
           </div>
         </div>
@@ -173,7 +224,7 @@ export default function Landing({ onStart }) {
         <div className="container feature-grid">
           <div>
             <span className="eyebrow">{t('feature.eyebrow')}</span>
-            <h2 style={{ fontFamily: 'var(--font-sans)', fontWeight: 800, letterSpacing: '-.035em', fontSize: 'clamp(30px,3.6vw,44px)', marginTop: 18, lineHeight: 1.06 }}>
+            <h2 style={{ fontFamily: 'var(--font-sans)', fontWeight: 500, letterSpacing: '-.035em', fontSize: 'clamp(30px,3.6vw,44px)', marginTop: 18, lineHeight: 1.06 }}>
               {t('feature.h2')}
             </h2>
             <p style={{ color: 'var(--ink-soft)', fontSize: 17, marginTop: 16, maxWidth: '34em' }}>{t('feature.lead')}</p>
@@ -216,7 +267,7 @@ export default function Landing({ onStart }) {
       <section className="section" style={{ textAlign: 'center' }}>
         <div className="container">
           <span className="eyebrow" style={{ justifyContent: 'center' }}><IconHourglass style={{ width: 15, height: 15 }} /> {t('finalCta.eyebrow')}</span>
-          <h2 style={{ fontFamily: 'var(--font-sans)', fontWeight: 800, letterSpacing: '-.035em', fontSize: 'clamp(32px,4vw,50px)', marginTop: 18, lineHeight: 1.04 }}>{t('finalCta.h2')}</h2>
+          <h2 style={{ fontFamily: 'var(--font-sans)', fontWeight: 500, letterSpacing: '-.035em', fontSize: 'clamp(32px,4vw,50px)', marginTop: 18, lineHeight: 1.04 }}>{t('finalCta.h2')}</h2>
           <p style={{ color: 'var(--ink-soft)', fontSize: 18, marginTop: 16, maxWidth: '30em', margin: '16px auto 0' }}>{t('finalCta.p')}</p>
           <button className="btn btn-primary btn-lg" style={{ marginTop: 30 }} onClick={onStart}>
             {t('finalCta.cta')} <IconArrowR style={{ width: 18, height: 18 }} />
@@ -252,11 +303,11 @@ export default function Landing({ onStart }) {
             </div>
             <div style={{ display: 'flex', gap: 40, flexWrap: 'wrap' }}>
               <div>
-                <p style={{ color: '#fff', fontWeight: 700, fontSize: 13, marginBottom: 12 }}>{t('footer.method')}</p>
+                <p style={{ color: '#fff', fontWeight: 500, fontSize: 13, marginBottom: 12 }}>{t('footer.method')}</p>
                 <p style={{ fontSize: 13 }}>SCORE2 · FINDRISC<br />AUDIT · STOP-Bang<br />STEADI · DAST-10</p>
               </div>
               <div>
-                <p style={{ color: '#fff', fontWeight: 700, fontSize: 13, marginBottom: 12 }}>{t('footer.privacy')}</p>
+                <p style={{ color: '#fff', fontWeight: 500, fontSize: 13, marginBottom: 12 }}>{t('footer.privacy')}</p>
                 <p style={{ fontSize: 13 }}>{t('footer.priv1')}<br />{t('footer.priv2')}<br />{t('footer.priv3')}</p>
               </div>
             </div>
@@ -307,7 +358,7 @@ export function BioRing({ value, big, mid }) {
       {big && (
         <text x="50%" y="50%" textAnchor="middle" dominantBaseline="central"
           transform={`rotate(90 ${size / 2} ${size / 2})`}
-          style={{ fontFamily: 'var(--font-display)', fontSize: 56, fontWeight: 700, fill: 'var(--emerald-800)' }}>
+          style={{ fontFamily: 'var(--font-display)', fontSize: 56, fontWeight: 500, fill: 'var(--emerald-800)' }}>
           {value}
         </text>
       )}

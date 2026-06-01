@@ -41,7 +41,10 @@ export default function Questionnaire({ onFinish, onExit }) {
               </svg>
             </span>
           </span>
-          <div className="progress-track"><div className="progress-fill" style={{ width: `${percent}%` }} /></div>
+          <div className="progress-wrap">
+            <div className="progress-cap">Собираем вашу модель организма по ответам · {percent}%</div>
+            <div className="progress-track"><div className="progress-fill" style={{ width: `${percent}%` }} /></div>
+          </div>
           <span className="progress-meta">{idx + 1} / {total}</span>
           <button className="exit-link" onClick={onExit}>Выйти</button>
         </div>

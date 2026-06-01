@@ -2,8 +2,7 @@ import { useState } from 'react'
 import { useI18n } from '../i18n.jsx'
 
 // Real logo files live in /public/logos/trust/.
-const PARTNERS = [
-  { file: 'World_Health_Organization_Logo.svg.png', name: 'ВОЗ', note: 'World Health Organization' },
+export const PARTNERS = [
   { file: 'cdc-logo-tag-right.svg', name: 'CDC', note: 'Centers for Disease Control' },
   { file: '5.webp', name: 'PubMed', note: 'Доказательная база' },
   { file: '2-1.webp', name: 'AEMPS', note: 'Агентство лекарств Испании' },

@@ -22,6 +22,14 @@ export default function AnatomyView({ organs, demographics, selected, onSelect }
   useEffect(() => {
     if (startedRef.current === key) return
     startedRef.current = key
+
+    // No backend configured → show the curated realistic render (calm, no per-user
+    // generation). The personalized parametric body replaces this once it's built.
+    const API_BASE = import.meta.env.VITE_API_BASE || ''
+    // sex/build-specific bodies need the parametric system (OpenAI blocks realistic
+    // female anatomy); use the curated realistic render for now.
+    if (!API_BASE) { setImage('/anatomy/base-healthy.png?v=4'); setStatus('done'); return }
+
     setStatus('loading'); setImage(null); setStep(0)
 
     const ctrl = new AbortController()
@@ -60,7 +68,8 @@ export default function AnatomyView({ organs, demographics, selected, onSelect }
 
       {status === 'done' ? (
         <>
-          <img className="anatomy-img" src={image} alt="Персональная анатомическая модель по вашим ответам" />
+          <img className="anatomy-img" src={image} alt="Персональная анатомическая модель по вашим ответам"
+            onError={(e) => { if (!e.currentTarget.src.includes('base-healthy')) e.currentTarget.src = '/anatomy/base-healthy.png?v=4' }} />
           <span className="anatomy-scan" />
           <span className="anatomy-glow" />
         </>
